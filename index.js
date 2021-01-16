@@ -11,7 +11,7 @@ class Action {
         this.versionFile = process.env.INPUT_VERSION_FILE_PATH || process.env.VERSION_FILE_PATH || this.projectFile
         this.versionRegex = new RegExp(process.env.INPUT_VERSION_REGEX || process.env.VERSION_REGEX, "m")
         this.version = process.env.INPUT_VERSION_STATIC || process.env.VERSION_STATIC
-        this.versionSuffix = process.env.INPUT_VERSION_SUFFIX || process.env.VERSION_SUFFIX
+        this.versionSuffix = process.env.INPUT_VERSION_SUFFIX || process.env.VERSION_SUFFIX || ""
         this.tagCommit = JSON.parse(process.env.INPUT_TAG_COMMIT || process.env.TAG_COMMIT)
         this.tagFormat = process.env.INPUT_TAG_FORMAT || process.env.TAG_FORMAT
         this.nugetKey = process.env.INPUT_NUGET_KEY || process.env.NUGET_KEY
@@ -60,7 +60,7 @@ class Action {
 
         this._executeInProcess(`dotnet build -c Release ${this.projectFile}`)
 
-        this._executeInProcess(`dotnet pack ${this.includeSymbols ? "--include-symbols -p:SymbolPackageFormat=snupkg" : ""} --no-build -c Release ${this.projectFile} -o .`)
+        this._executeInProcess(`dotnet pack ${this.includeSymbols ? "--include-symbols -p:SymbolPackageFormat=snupkg" : ""} ${this.versionSuffix != "" ? "-p:PackageVersion=" + this.version + this.versionSuffix : ""} --no-build -c Release ${this.projectFile} -o .`)
 
         const packages = fs.readdirSync(".").filter(fn => fn.endsWith("nupkg"))
         console.log(`Generated Package(s): ${packages.join(", ")}`)
